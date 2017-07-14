@@ -18,7 +18,7 @@
     // Cordova is ready
     //
     function onDeviceReady() {
-        var db = window.openDatabase("Database", "1.0", "Cordova Demo", 200000);
+        var db = window.openDatabase("Database", "1.0", "Login Demo", 200000);
         document.getElementById("print").innerHTML="Ready";
         db.transaction(populateDB, errorCB, successCB);
     }
