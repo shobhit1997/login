@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+        <title>Blank App</title>
+    </head>
+    <body>
+    <form >
+    	Eninov Id:<input type="email" name="username"><br>
+    	Password:<input type="password" name="password"><br>
+    	<input type="submit" name="button" value="Login" onclick="check()">
+    </form>
+    <script type="text/javascript">
+    	 document.addEventListener("deviceready", onDeviceReady, false);
+
+    // Cordova is ready
+    //
+    function onDeviceReady() {
+        var db = window.openDatabase("Database", "1.0", "Cordova Demo", 200000);
+        db.transaction(populateDB, errorCB, successCB);
+    }
+
+    // Populate the database 
+    //
+    function populateDB(tx) {
+         tx.executeSql('DROP TABLE IF EXISTS DEMO');
+         tx.executeSql('CREATE TABLE IF NOT EXISTS DEMO (id PRIMARY, pass)');
+         tx.executeSql('INSERT INTO DEMO (id, data) VALUES ("shobhit@eninov.com", "abcd")');
+         tx.executeSql('INSERT INTO DEMO (id, data) VALUES ("anurag@eninov.com", "abcd")');
+    }
+
+    // Transaction error callback
+    //
+    function queryDB(tx) {
+        tx.executeSql('SELECT * FROM DEMO', [], querySuccess, errorCB);
+    }
+
+    // Query the success callback
+    //
+    function querySuccess(tx, results) {
+        var len = results.rows.length;
+        console.log("DEMO table: " + len + " rows found.");
+        for (var i=0; i<len; i++){
+            console.log("Row = " + i + " ID = " + results.rows.item(i).id + " Data =  " + results.rows.item(i).password);
+        }
+    }
+
+    // Transaction error callback
+    //
+    function errorCB(err) {
+        console.log("Error processing SQL: "+err.code);
+    }
+
+    // Transaction success callback
+    //
+    function successCB() {
+        var db = window.openDatabase("Database", "1.0", "Login Demo", 200000);
+        db.transaction(queryDB, errorCB);
+    }
+
+    </script>
+        <script type="text/javascript" src="cordova.js"></script>
+    </body>
+</html>
