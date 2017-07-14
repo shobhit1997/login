@@ -11,6 +11,7 @@
     	Password:<input type="password" name="password"><br>
     	<input type="submit" name="button" value="Login" onclick="check()">
     </form>
+    <div id="print"></div>
     <script type="text/javascript">
     	 document.addEventListener("deviceready", onDeviceReady, false);
 
@@ -18,6 +19,7 @@
     //
     function onDeviceReady() {
         var db = window.openDatabase("Database", "1.0", "Cordova Demo", 200000);
+        document.getElementById("print").innerHTML="Ready";
         db.transaction(populateDB, errorCB, successCB);
     }
 
@@ -28,6 +30,7 @@
          tx.executeSql('CREATE TABLE IF NOT EXISTS DEMO (id PRIMARY, pass)');
          tx.executeSql('INSERT INTO DEMO (id, data) VALUES ("shobhit@eninov.com", "abcd")');
          tx.executeSql('INSERT INTO DEMO (id, data) VALUES ("anurag@eninov.com", "abcd")');
+         document.getElementById("print").innerHTML="Added";
     }
 
     // Transaction error callback
@@ -42,7 +45,11 @@
         var len = results.rows.length;
         console.log("DEMO table: " + len + " rows found.");
         for (var i=0; i<len; i++){
-            console.log("Row = " + i + " ID = " + results.rows.item(i).id + " Data =  " + results.rows.item(i).password);
+
+            var p="Row = " + i + " ID = " + results.rows.item(i).id + " Data =  " + results.rows.item(i).password;
+            console.log(p);
+            document.getElementById("print").innerHTML=p;
+
         }
     }
 
@@ -50,12 +57,14 @@
     //
     function errorCB(err) {
         console.log("Error processing SQL: "+err.code);
+        document.getElementById("print").innerHTML=err.code;
     }
 
     // Transaction success callback
     //
     function successCB() {
         var db = window.openDatabase("Database", "1.0", "Login Demo", 200000);
+        document.getElementById("print").innerHTML="Success";
         db.transaction(queryDB, errorCB);
     }
 
