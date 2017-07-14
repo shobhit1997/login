@@ -7,66 +7,66 @@
     </head>
     <body>
     <form >
-    	Eninov Id:<input type="email" name="username"><br>
-    	Password:<input type="password" name="password"><br>
-    	<input type="submit" name="button" value="Login" onclick="check()">
+    	Eninov Id:<input type="email" name="username" id="username"><br>
+    	Password:<input type="password" name="password" id="password"><br>
+    	<input type="submit" name="button" value="Login" onclick="insertData()">
     </form>
+    <button onclick="showTable()">Display</button>
     <div id="print"></div>
-    <script type="text/javascript">
-    	 document.addEventListener("deviceready", onDeviceReady, false);
+    <script type="text/javascript" charset="utf-8">
+var myDB;
+//Open Database Connection
+document.addEventListener("deviceready",onDeviceReady,false);
+function onDeviceReady(){
+myDB = window.sqlitePlugin.openDatabase({name: "mySQLite.db", location: 'default'});
+createTable();
+}
+//Create new table
+function createTable(){
+    myDB.transaction(function(transaction) {
+    transaction.executeSql('CREATE TABLE IF NOT EXISTS phonegap_pro (id integer primary key, username text, password text)', [],
+        function(tx, result) {
+            alert("Table created successfully");
 
-    // Cordova is ready
-    //
-    function onDeviceReady() {
-        var db = window.openDatabase("Database", "1.0", "Login Demo", 200000);
-        document.getElementById("print").innerHTML="Ready";
-        db.transaction(populateDB, errorCB, successCB);
-    }
+        }, 
+        function(error) {
+              alert("Error occurred while creating the table.");
+        });
+    });
+}
 
-    // Populate the database 
-    //
-    function populateDB(tx) {
-         tx.executeSql('DROP TABLE IF EXISTS DEMO');
-         tx.executeSql('CREATE TABLE IF NOT EXISTS DEMO (id PRIMARY, pass)');
-         tx.executeSql('INSERT INTO DEMO (id, data) VALUES ("shobhit@eninov.com", "abcd")');
-         tx.executeSql('INSERT INTO DEMO (id, data) VALUES ("anurag@eninov.com", "abcd")');
-         document.getElementById("print").innerHTML="Added";
-    }
+//Insert New Data
+function insertData(){
+  var username=document.getElementById('username').value;
+  var password=document.getElementById('password').value;
+  console.log(title +""+ desc);
+  myDB.transaction(function(transaction) {
+        var executeQuery = "INSERT INTO phonegap_pro (username, password) VALUES (?,?)";             
+        transaction.executeSql(executeQuery, [username,password]
+            , function(tx, result) {
+                 alert('Inserted');
+            },
+            function(error){
+                 alert('Error occurred'); 
+            });
+    });
+}
 
-    // Transaction error callback
-    //
-    function queryDB(tx) {
-        tx.executeSql('SELECT * FROM DEMO', [], querySuccess, errorCB);
-    }
+//Display Table Data
+function showTable(){
+  
+  myDB.transaction(function(transaction) {
+  transaction.executeSql('SELECT * FROM phonegap_pro', [], function (tx, results) {
+       var len = results.rows.length, i;
+   
+       for (i = 0; i < len; i++){
+          document.getElementById('print').innerHTML=results.rows.item(i).id+<br>+results.rows.item(i).username+"<br>"+results.rows.item(i).password;
+       }
+    }, null);
+  });
+};
 
-    // Query the success callback
-    //
-    function querySuccess(tx, results) {
-        var len = results.rows.length;
-        console.log("DEMO table: " + len + " rows found.");
-        for (var i=0; i<len; i++){
 
-            var p="Row = " + i + " ID = " + results.rows.item(i).id + " Data =  " + results.rows.item(i).password;
-            console.log(p);
-            document.getElementById("print").innerHTML=p;
-
-        }
-    }
-
-    // Transaction error callback
-    //
-    function errorCB(err) {
-        console.log("Error processing SQL: "+err.code);
-        document.getElementById("print").innerHTML=err.code;
-    }
-
-    // Transaction success callback
-    //
-    function successCB() {
-        var db = window.openDatabase("Database", "1.0", "Login Demo", 200000);
-        document.getElementById("print").innerHTML="Success";
-        db.transaction(queryDB, errorCB);
-    }
 
     </script>
         <script type="text/javascript" src="cordova.js"></script>
