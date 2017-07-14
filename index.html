@@ -9,103 +9,64 @@
     <form >
     	Eninov Id:<input type="email" name="username" id="username"><br>
     	Password:<input type="password" name="password" id="password"><br>
-    	<input type="submit" name="button" value="Login" onclick="AddValueToDB()">
+    	<input type="submit" name="button" value="Login">
     </form>
-    <button onclick="ListDBValues()">Display</button>
+    <button onclick="display()">Display</button>
     <div id="print"></div>
    <script type="text/javascript" charset="utf-8">
 
-// global variables
-var db;
-var shortName = 'WebSqlDB';
-var version = '1.0';
-var displayName = 'WebSqlDB';
-var maxSize = 65535;
+   document.addEventListener("deviceready",onDeviceReady,false);
+   var db;
+   function onDeviceReady() {
+       // body...
+       db=window.openDatabase("Database","1.0","myDB",2*1024*1024);
+       db.transaction(createDb,errorDb,successDb);
+   }
+   function createDb(tx) {
+       // body...
+       db.executeSql('CREATE TABLE IF NOT EXISTS USERS(usernmae,password)');
 
-// this is called when an error happens in a transaction
-function errorHandler(transaction, error) {
-   alert('Error: ' + error.message + ' code: ' + error.code);
+   }
+   function errorDb(err) {
+       // body...
+       alert("ERROR "+err.code);
+   }
+   function successDb() {
+       // body...
+       alert("Success");
+       db.transaction(insertDb,errorDb);
+   }
 
-}
+   function insertDb(tx) {
+       // body...
+       tx.executeSql('INSERT INTO USERS VALUES('SHOBHIT','ABCD')');
+       tx.executeSql('INSERT INTO USERS VALUES('ANURAG','XXFSH')');
 
-// this is called when a successful transaction happens
-function successCallBack() {
-   alert("DEBUGGING: success");
+   }
 
-}
-
-function nullHandler(){};
-
-// called when the application loads
-function onBodyLoad(){
-
-alert("DEBUGGING: we are in the onBodyLoad() function");
-
- if (!window.openDatabase) {
-  
-   alert('Databases are not supported in this browser.');
-   return;
- }
-
-
- db = openDatabase(shortName, version, displayName,maxSize);
-
- db.transaction(function(tx){
-
-   tx.executeSql( 'CREATE TABLE IF NOT EXISTS User(UserId INTEGER NOT NULL PRIMARY KEY, Username TEXT NOT NULL, Password TEXT NOT NULL)',
-[],nullHandler,errorHandler);
- },errorHandler,successCallBack);
-
-}
+   function display(argument) {
 
 
-function ListDBValues() {
-
- if (!window.openDatabase) {
-  alert('Databases are not supported in this browser.');
-  return;
- }
+       // body...
+       db.transaction(successQueryDb,errorDb)
+   }
 
 
- db.transaction(function(transaction) {
-   transaction.executeSql('SELECT * FROM User;', [],
-     function(transaction, result) {
-      if (result != null && result.rows != null) {
-        for (var i = 0; i < result.rows.length; i++) {
-          var row = result.rows.item(i);
-          $('#print').append('<br>' + row.UserId + '. ' +
-row.Username+ ' ' + row.Password);
-        }
-      }
-     },errorHandler);
- },errorHandler,nullHandler);
+   function successQueryDb(tx) {
+       // body...
+       tx.executeSql('SELECT * FROM USERS',[],renderList,errorDb);
+   }
+   function renderList(tx,results) {
+       // body...
+       var htmlstring="";
+       var len=results.rows.lenght;
+       for(var i=0;i<len;i++)
+       {
+        htmlstring+='<br>'+results.rows.item(i).username+'<br>'+results.rows.item(i).password+'<br>';
+       }
+       document.getElementById("print").innerHTML=htmlstring;
 
- return;
-
-}
-
-
-function AddValueToDB() {
-
- if (!window.openDatabase) {
-   alert('Databases are not supported in this browser.');
-   return;
- }
-
-
- db.transaction(function(transaction) {
-   transaction.executeSql('INSERT INTO User(Username, Password)
-VALUES (?,?)',[$('#username').val(), $('#password').val()],
-     nullHandler,errorHandler);
-   });
-
-
- ListDBValues();
-
- return false;
-
-}
-
+   }
 </script>
         <script type="text/javascript" src="cordova.js"></script>
     </body>
