@@ -9,66 +9,104 @@
     <form >
     	Eninov Id:<input type="email" name="username" id="username"><br>
     	Password:<input type="password" name="password" id="password"><br>
-    	<input type="submit" name="button" value="Login" onclick="insertData()">
+    	<input type="submit" name="button" value="Login" onclick="AddValueToDB()">
     </form>
-    <button onclick="showTable()">Display</button>
+    <button onclick="ListDBValues()">Display</button>
     <div id="print"></div>
-    <script type="text/javascript" charset="utf-8">
-var myDB;
-//Open Database Connection
-document.addEventListener("deviceready",onDeviceReady,false);
-function onDeviceReady(){
-myDB = window.sqlitePlugin.openDatabase({name: "mySQLite.db", location: 'default'});
-createTable();
-}
-//Create new table
-function createTable(){
-    myDB.transaction(function(transaction) {
-    transaction.executeSql('CREATE TABLE IF NOT EXISTS phonegap_pro (id integer primary key, username text, password text)', [],
-        function(tx, result) {
-            alert("Table created successfully");
+   <script type="text/javascript" charset="utf-8">
 
-        }, 
-        function(error) {
-              alert("Error occurred while creating the table.");
-        });
-    });
+// global variables
+var db;
+var shortName = 'WebSqlDB';
+var version = '1.0';
+var displayName = 'WebSqlDB';
+var maxSize = 65535;
+
+// this is called when an error happens in a transaction
+function errorHandler(transaction, error) {
+   alert('Error: ' + error.message + ' code: ' + error.code);
+
 }
 
-//Insert New Data
-function insertData(){
-  var username=document.getElementById('username').value;
-  var password=document.getElementById('password').value;
-  console.log(title +""+ desc);
-  myDB.transaction(function(transaction) {
-        var executeQuery = "INSERT INTO phonegap_pro (username, password) VALUES (?,?)";             
-        transaction.executeSql(executeQuery, [username,password]
-            , function(tx, result) {
-                 alert('Inserted');
-            },
-            function(error){
-                 alert('Error occurred'); 
-            });
-    });
+// this is called when a successful transaction happens
+function successCallBack() {
+   alert("DEBUGGING: success");
+
 }
 
-//Display Table Data
-function showTable(){
+function nullHandler(){};
+
+// called when the application loads
+function onBodyLoad(){
+
+alert("DEBUGGING: we are in the onBodyLoad() function");
+
+ if (!window.openDatabase) {
   
-  myDB.transaction(function(transaction) {
-  transaction.executeSql('SELECT * FROM phonegap_pro', [], function (tx, results) {
-       var len = results.rows.length, i;
-   
-       for (i = 0; i < len; i++){
-          document.getElementById('print').innerHTML=results.rows.item(i).id+<br>+results.rows.item(i).username+"<br>"+results.rows.item(i).password;
-       }
-    }, null);
-  });
-};
+   alert('Databases are not supported in this browser.');
+   return;
+ }
 
 
+ db = openDatabase(shortName, version, displayName,maxSize);
 
-    </script>
+ db.transaction(function(tx){
+
+   tx.executeSql( 'CREATE TABLE IF NOT EXISTS User(UserId INTEGER NOT NULL PRIMARY KEY, Username TEXT NOT NULL, Password TEXT NOT NULL)',
+[],nullHandler,errorHandler);
+ },errorHandler,successCallBack);
+
+}
+
+
+function ListDBValues() {
+
+ if (!window.openDatabase) {
+  alert('Databases are not supported in this browser.');
+  return;
+ }
+
+
+ db.transaction(function(transaction) {
+   transaction.executeSql('SELECT * FROM User;', [],
+     function(transaction, result) {
+      if (result != null && result.rows != null) {
+        for (var i = 0; i < result.rows.length; i++) {
+          var row = result.rows.item(i);
+          $('#print').append('<br>' + row.UserId + '. ' +
+row.Username+ ' ' + row.Password);
+        }
+      }
+     },errorHandler);
+ },errorHandler,nullHandler);
+
+ return;
+
+}
+
+
+function AddValueToDB() {
+
+ if (!window.openDatabase) {
+   alert('Databases are not supported in this browser.');
+   return;
+ }
+
+
+ db.transaction(function(transaction) {
+   transaction.executeSql('INSERT INTO User(Username, Password)
+VALUES (?,?)',[$('#username').val(), $('#password').val()],
+     nullHandler,errorHandler);
+   });
+
+
+ ListDBValues();
+
+ return false;
+
+}
+
+</script>
         <script type="text/javascript" src="cordova.js"></script>
     </body>
 </html>
